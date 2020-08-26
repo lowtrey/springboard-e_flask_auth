@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, User, Tweet
 from forms import UserForm, TweetForm
+from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
 
@@ -70,7 +71,13 @@ def register_user():
     new_user = User.register(username, password)
 
     db.session.add(new_user)
-    db.session.commit()
+    # Handle Error if username already exists
+    try:
+      db.session.commit()
+    except IntegrityError:
+      form.username.errors.append("Username taken, please choose another")
+      return render_template("register.html", form=form)
+      
     session["user_id"] = new_user.id
     flash("Welcome! Successfully Created Your Account!", "success")
     return redirect("/tweets")
