@@ -41,3 +41,18 @@ def register_user():
     return redirect("/tweets")
   else:
     return render_template("register.html", form=form)
+
+@app.route("/login", methods=["GET", "POST"])
+def login_user():
+  form = UserForm()
+  if form.validate_on_submit():
+    username = form.username.data
+    password = form.password.data
+
+    user = User.authenticate(username, password)
+    if user:
+      return redirect("/tweets")
+    else:
+      form.username.errors = ["Invalid username / password."]
+      
+  return render_template("login.html", form=form)
