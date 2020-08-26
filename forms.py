@@ -7,3 +7,7 @@ class UserForm(FlaskForm):
   username = StringField("Username", validators=[InputRequired()])
 
   password = PasswordField("Password", validators=[InputRequired()])
+
+class TweetForm(FlaskForm):
+
+  text = StringField("Tweet Text", validators=[InputRequired()])

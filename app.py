@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
-from models import db, connect_db, User
-from forms import UserForm
+from models import db, connect_db, User, Tweet
+from forms import UserForm, TweetForm
 
 app = Flask(__name__)
 
@@ -22,12 +22,24 @@ connect_db(app)
 def show_index():
   return render_template("index.html")
 
-@app.route("/tweets")
+@app.route("/tweets", methods=["GET", "POST"])
 def show_tweets():
   if "user_id" not in session:
     flash("You must login to view this page.")
     return redirect("/")
-  return render_template("tweets.html")
+    
+  form = TweetForm()
+  all_tweets = Tweet.query.all()
+
+  if form.validate_on_submit():
+    text = form.text.data
+    new_tweet = Tweet(text=text, user_id=session["user_id"])
+    db.session.add(new_tweet)
+    db.session.commit()
+    flash("Tweet Created!")
+    return redirect("/tweets")
+    
+  return render_template("tweets.html", form=form, tweets=all_tweets)
 
 # Registration Route
 @app.route("/register", methods=["GET", "POST"])
