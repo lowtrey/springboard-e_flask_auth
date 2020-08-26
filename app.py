@@ -25,7 +25,7 @@ def show_index():
 @app.route("/tweets", methods=["GET", "POST"])
 def show_tweets():
   if "user_id" not in session:
-    flash("You must login to view this page.")
+    flash("You must login to view this page.", "danger")
     return redirect("/")
     
   form = TweetForm()
@@ -36,7 +36,7 @@ def show_tweets():
     new_tweet = Tweet(text=text, user_id=session["user_id"])
     db.session.add(new_tweet)
     db.session.commit()
-    flash("Tweet Created!")
+    flash("Tweet Created!", "success")
     return redirect("/tweets")
     
   return render_template("tweets.html", form=form, tweets=all_tweets)
@@ -47,17 +47,17 @@ def delete_tweet(id):
   """Delete Tweet"""
   # Make sure user is logged in.
   if "user_id" not in session:
-    flash("Please login first.")
+    flash("Please login first.", "danger")
     return redirect("/login")
   else:
     tweet = Tweet.query.get_or_404(id)
     if tweet.user_id == session["user_id"]:
       db.session.delete(tweet)
       db.session.commit()
-      flash("Tweet Deleted!")
+      flash("Tweet Deleted!", "info")
       return redirect("/tweets")
     else:
-      flash("You don't have permission to do that.")
+      flash("You don't have permission to do that.", "danger")
       return redirect("/tweets")
 
 # Registration Route
@@ -72,7 +72,7 @@ def register_user():
     db.session.add(new_user)
     db.session.commit()
     session["user_id"] = new_user.id
-    flash("Welcome! Successfully Created Your Account!")
+    flash("Welcome! Successfully Created Your Account!", "success")
     return redirect("/tweets")
   else:
     return render_template("register.html", form=form)
@@ -86,7 +86,7 @@ def login_user():
     password = form.password.data
     user = User.authenticate(username, password)
     if user:
-      flash(f"Welcome Back, {user.username}!")
+      flash(f"Welcome Back, {user.username}!", "primary")
       session["user_id"] = user.id
       return redirect("/tweets")
     else:
@@ -98,5 +98,5 @@ def login_user():
 @app.route("/logout")
 def logout_user():
   session.pop("user_id")
-  flash("Goodbye!")
+  flash("Goodbye!", "info")
   return redirect("/")
